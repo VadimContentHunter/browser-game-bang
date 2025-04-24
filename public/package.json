@@ -1,0 +1,41 @@
+{
+    "name": "browser-game-bang",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "dev-debug": "npx nodemon --watch app --ext .ts,.js --exec \"npx node --inspect=0.0.0.0:9229 --no-warnings=ExperimentalWarning --loader ts-node/esm app/server.ts\"",
+        "dev": "npx nodemon --watch app --ext .ts,.js --exec \"npx node --no-warnings=ExperimentalWarning --loader ts-node/esm app/server.ts\"",
+        "build": "npx rimraf ./dist && npx tsc",
+        "start": "npm run build && node dist/server",
+        "lint": "npx eslint ./app",
+        "format": "npx eslint ./app --fix",
+        "updateBashHooks": "npx node scripts/updateBashHooks.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "type": "module",
+    "devDependencies": {
+        "@commitlint/cli": "^19.8.0",
+        "@commitlint/config-conventional": "^19.8.0",
+        "@eslint/js": "^9.25.0",
+        "@types/express": "^5.0.1",
+        "@types/node": "^22.14.1",
+        "@typescript-eslint/eslint-plugin": "^8.30.1",
+        "@typescript-eslint/parser": "^8.30.1",
+        "eslint": "^9.25.0",
+        "eslint-config-prettier": "^10.1.2",
+        "eslint-plugin-prettier": "^5.2.6",
+        "globals": "^16.0.0",
+        "nodemon": "^3.1.9",
+        "prettier": "^3.5.3",
+        "rimraf": "^6.0.1",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.8.3",
+        "typescript-eslint": "^8.30.1"
+    },
+    "dependencies": {
+        "express": "^5.1.0"
+    }
+}

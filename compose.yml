@@ -1,0 +1,36 @@
+version: "3.8"
+
+networks:
+  browser-game-network:
+    name: browser-game-bang
+    driver: bridge
+
+services:
+  node-app:
+    build:
+      context: .
+      dockerfile: docker/node-js-22/Dockerfile
+    container_name: server-browser-game-bang
+    working_dir: /var/www/browser-game-bang  # Указываем рабочую директорию внутри контейнера
+    ports:
+      - "9003:9003" # Пробрасываем порт для работы сервера
+      - "9229:9229" # Пробрасываем порт для отладки Node.js
+    volumes:
+      - ./public:/var/www/browser-game-bang  # Монтируем локальную папку public в контейнер
+    networks:
+      - browser-game-network
+    # command: npm run dev-debug
+    command: npm run dev #Запуск с nodemon но без дебага
+    # command: npm run start # Запускаем сервер через npm start
+
+    # ---
+    # environment — это ключ, который используется в Docker Compose для задания
+    # переменных окружения внутри контейнера.
+    # Пример использования:
+    # const nodeEnv = process.env.NODE_ENV;  // "production"
+    # const databaseUrl = process.env.DATABASE_URL;
+    # ---
+    #environment:
+    #  - NODE_ENV=production //development,production
+    #  - DATABASE_URL=mongodb://mongo:27017/mydb
+    # ---

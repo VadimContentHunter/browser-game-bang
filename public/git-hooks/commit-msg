@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Сообщение перед ошибкой или другого вывода
+echo "activated hook"
+
+cd public || exit 1
+node scripts/commit-msg.js "$1"

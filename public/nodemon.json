@@ -1,0 +1,6 @@
+{
+    "watch": ["app"],
+    "ext": ".ts,.js",
+    "ignore": [],
+    "legacyWatch": true
+}

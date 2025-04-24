@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+# Сообщение перед ошибкой или другого вывода
+echo "activated hook"
+
+# Проверка линтинга
+cd public || exit 1
+npm run lint
+if [ $? -ne 0 ]; then
+  echo "Linting failed. Please fix the issues before committing."
+  exit 1
+fi
+
+# Если все проверки прошли, коммит продолжается
+exit 0

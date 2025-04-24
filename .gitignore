@@ -1,0 +1,5 @@
+/.databases
+/.git
+/databases
+/public/node_modules
+/public/dist
