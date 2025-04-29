@@ -19,8 +19,8 @@ services:
       - ./public:/var/www/browser-game-bang  # Монтируем локальную папку public в контейнер
     networks:
       - browser-game-network
-    # command: npm run dev-debug
-    command: npm run dev #Запуск с nodemon но без дебага
+    command: npm run dev-debug
+    # command: npm run dev #Запуск с nodemon но без дебага
     # command: npm run start # Запускаем сервер через npm start
 
     # ---
