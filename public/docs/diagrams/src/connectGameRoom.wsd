@@ -1,4 +1,4 @@
-@startuml eventAuthorization
+@startuml connectGameRoom
 |Server|
 start
 note
