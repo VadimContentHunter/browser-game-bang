@@ -1,0 +1,27 @@
+@startuml eventAuthorization
+|ServerHook|
+start
+note
+Сработало событие **authorization**
+----
+//Передаваемый параметр: name//
+end note
+
+|GameRoom|
+:Проверить существует ли игрок
+с введенным именем;
+
+if (Имя занято?) then (Да)
+  |ServerHook|
+  :Вернуть ошибку;
+  stop
+else (Нет)
+  |GameRoom|
+  :Добавить игрока;
+endif
+
+|ServerHook|
+:Переадресация игрока с таким именем
+в комнату;
+stop
+@enduml

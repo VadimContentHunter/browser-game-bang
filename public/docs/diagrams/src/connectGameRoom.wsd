@@ -1,0 +1,23 @@
+@startuml eventAuthorization
+|Server|
+start
+note
+Подключение клиента
+в GameRoom
+end note
+
+|GameRoom|
+if (Существует ли игрок
+с подключаемым именем?) then (Да)
+  |Server|
+  :вернуть ошибку;
+  stop
+else (Нет)
+  |GameRoom|
+  :Подключить клиента к игроку;
+endif
+
+|Server|
+:вернуть HTML страницу комнаты;
+stop
+@enduml
