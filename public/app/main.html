@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Клиент</title>
+</head>
+
+<body>
+    <h1>WebSocket Client</h1>
+    <div id="messages"></div>
+
+    <script>
+        const messagesDiv = document.getElementById('messages');
+
+        // Открываем подключение WebSocket
+        const socket = new WebSocket('ws://' + window.location.hostname + ':9003');
+
+        // Обработка открытия соединения
+        socket.onopen = function () {
+            console.log('WebSocket соединение установлено');
+            messagesDiv.innerHTML += '<p><strong>Соединение установлено.</strong></p>';
+
+            // Можно сразу отправить сообщение на сервер
+            socket.send('Привет сервер!');
+        };
+
+        // Обработка получения сообщений от сервера
+        socket.onmessage = function (event) {
+            console.log('Получено сообщение от сервера:', event.data);
+            messagesDiv.innerHTML += `<p>Сообщение от сервера: ${event.data}</p>`;
+        };
+
+        // Обработка ошибок
+        socket.onerror = function (error) {
+            console.error('Ошибка WebSocket:', error);
+            messagesDiv.innerHTML += `<p style="color:red;">Ошибка WebSocket: ${error.message}</p>`;
+        };
+
+        // Обработка закрытия соединения
+        socket.onclose = function (event) {
+            console.log('WebSocket соединение закрыто', event);
+            messagesDiv.innerHTML += '<p><strong>Соединение закрыто.</strong></p>';
+        };
+    </script>
+</body>
+
+</html>
