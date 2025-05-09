@@ -1,0 +1,43 @@
+@startuml components
+title Компоненты с портами и интерфейсами
+
+' Интерфейсы
+interface iGameSession as iGS
+interface iCard as iC
+interface iPlayer as iP
+interface iPlayerManager as iPM
+
+' Компоненты
+component GameHandler
+component GameRoom
+component Card
+component Player
+component GameSession {
+  port iGameSession as GSP1
+
+  component PlayArea
+  component DiscardPile
+  component CardDeck
+  component PlayerManager
+  component PlayersDistances
+}
+
+' Связи
+Card - iC
+Player - iP
+PlayerManager - iPM
+GSP1 -up- iGS
+
+GameHandler .. iGS : USE
+Card .. iGS : USE
+PlayArea          .> iC
+DiscardPile       .> iC
+CardDeck          .> iC
+PlayerManager     .> iC
+PlayersDistances  .> iC
+GameRoom .. iPM : USE
+PlayerManager     .. iP : USE
+PlayersDistances  .. iP : USE
+Player .up. iC : USE
+@enduml
+
