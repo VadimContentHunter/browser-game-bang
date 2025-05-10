@@ -1,0 +1,46 @@
+@startuml sequenceDiagramsBrief
+title Краткий сценарий взаимодействия клиента и сервера
+
+actor Клиент as client
+participant Сервер as server
+
+==Переход на страниц==
+autonumber
+client -> server ++ : переход на страницу
+server -> server ++-- #005500 : вызов события
+
+alt#Gold #ebffdd Если существует событие
+    server -> server ++-- #d6d300 : генерация html страницы
+    server -->> client : Возврат HTML страницы
+else #ffeeee Если событие не найдено
+    ' server -> server ++ #d6d300
+    server -->> client -- : Возврат, кода ошибки\n отсутствия указанного события
+end
+
+== Действие пользователя (не связанное с игрой) ==
+autonumber 1
+client -> server ++ : Действие пользователя не связанное с игрой,\n например подтвердить ввод данных
+server -> server ++-- #005500 : вызов события
+
+alt#Gold #ebffdd Если существует событие
+    server -> server ++-- #d6d300 : Обработка событий,\n действия пользователя
+    server -->> client
+else #ffeeee Если событие не найдено
+    ' server -> server ++ #d6d300
+    server -->> client -- : Возврат, кода ошибки\n отсутствия указанного события
+end
+
+== Игровой ход ==
+autonumber 1
+client -> server ++ : Игровой ход
+server -> server ++-- #005500 : вызов события
+
+alt#Gold #ebffdd Если существует событие
+    server -> server ++-- #d6d300 : Обработка игровых события
+    server -->> client
+else #ffeeee Если событие не найдено
+    ' server -> server ++ #d6d300
+    server -->> client -- : Возврат, кода ошибки\n отсутствия указанного события
+end
+
+@enduml

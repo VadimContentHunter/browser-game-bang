@@ -1,0 +1,21 @@
+@startuml sequenceDiagramsDetailed
+title Диаграмма последовательности для игры БЭНГ! (Детальная)
+
+actor Клиент as client
+participant Сервер as server
+participant WebSocket 
+
+==Переход на страниц==
+autonumber
+client -> server ++ : переход на страницу
+server -> server ++-- #005500 : вызов события
+
+alt#Gold #LightBlue Если существует событие
+    server -> server ++-- #d6d300 : генерация html страницы
+    server -->> client : Возврат HTML страницы
+else #Pink Если событие не найдено
+    ' server -> server ++ #d6d300
+    server -->> client -- : Возврат, кода ошибки\n отсутствия указанного события
+end
+
+@enduml

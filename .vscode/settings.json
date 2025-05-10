@@ -1,0 +1,5 @@
+{
+    "plantuml.diagramsRoot": "public\\docs\\diagrams\\src",
+    "plantuml.exportOutDir": "public\\docs\\diagrams\\view",
+    "plantuml.exportMapFile": true
+}

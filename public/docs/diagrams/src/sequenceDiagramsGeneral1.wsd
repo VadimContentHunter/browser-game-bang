@@ -1,0 +1,46 @@
+@startuml sequenceDiagramsGeneral
+title Основной сценарий: вход в игру и начало взаимодействия
+
+actor Клиент as client
+participant Сервер as server #00dac7
+participant WebSocket #65d3ff
+
+autonumber
+==Переход на сайт==
+client -> server ++ #00dac7 : Переход на главную страницу / сайт
+server -> server ++-- #005500 : вызов события "для страницы Входа"
+alt#Gold #ebffdd Если существует событие
+    server -> server ++-- #d6d300 : Генерация html страницы "Входа"
+    server --> client -- : Возврат HTML страницы "Входа"
+else #ffeeee Если событие не найдено
+    autonumber 4
+    server -->> client !! : Возврат, кода ошибки\n отсутствия указанного события
+    |||
+end
+
+|||
+client ->> WebSocket ++ #65d3ff : Установка соединения
+alt#Gold #ebffdd Если существует событие
+    WebSocket -->> client : Подтверждение успешного подключения
+
+    == Действие пользователя (не связанное с игрой) ==
+    client ->> WebSocket : Попытка авторизации
+    WebSocket -> WebSocket ++-- #005500 : Вызов события
+    WebSocket -> WebSocket ++-- #d6d300 : Авторизация пользователя как игрока
+    WebSocket -->> client -- : Возврат HTML страницы "Игровая комната"
+    |||
+    == Игровой ход ==
+    client ->> WebSocket ++ #65d3ff : Игровой ход
+    WebSocket -> WebSocket ++-- #005500 : Вызов события
+    WebSocket -> WebSocket ++-- #d6d300 : Обработка хода
+
+    opt#Gold Если есть ответ
+        WebSocket -->> client : Ответ, если есть
+        |||
+    end
+else #ffeeee Если событие не найдено
+    autonumber 14
+    server -->> client !! : Возврат, кода ошибки\n отсутствия указанного события
+    |||
+end
+@enduml
