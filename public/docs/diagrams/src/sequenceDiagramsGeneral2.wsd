@@ -1,5 +1,5 @@
-@startuml sequenceDiagramsGeneral1
-title Основной сценарий: __ПЕРВЫЙ__ вход в игру и начало взаимодействия
+@startuml sequenceDiagramsGeneral2
+title Основной сценарий: __ПОВТОРНЫЙ__ вход в игру и начало взаимодействия
 
 actor Клиент as client
 participant Сервер as server #00dac7
@@ -8,10 +8,11 @@ participant WebSocket #65d3ff
 autonumber
 ==Переход на сайт==
 client -> server ++ #00dac7 : Переход на главную страницу / сайт
-server -> server ++-- #005500 : вызов события "для страницы Входа"
+server -> server ++-- #005500 : вызов события "для страницы"
 alt#Gold #ebffdd Если существует событие
-    server -> server ++-- #d6d300 : Генерация html страницы "Входа"
-    server --> client : Возврат HTML страницы "Входа"
+    server -> server ++-- #d6d300 : Обработка сессии игрока
+    server -> server ++-- #d6d300 : Генерация html страницы "Игровая комната"
+    server --> client : Возврат HTML страницы "Игровая комната"
 else #ffeeee Если событие не найдено
     autonumber 3
     server -->> client !! : Возврат, кода ошибки\n отсутствия указанного события
@@ -24,12 +25,10 @@ client ->> WebSocket ++ #65d3ff : Установка соединения
 alt#Gold #ebffdd Если существует событие
     WebSocket -->> client : Подтверждение успешного подключения
 
-    == Действие пользователя (не связанное с игрой) ==
-    client ->> WebSocket : Попытка авторизации
+    client -> WebSocket : Попытка авторизации по сессии
     WebSocket -> WebSocket ++-- #005500 : Вызов события
     WebSocket -> WebSocket ++-- #d6d300 : Авторизация пользователя как игрока
-    WebSocket -> WebSocket ++-- #d6d300 : Генерация html страницы "Игровая комната"
-    WebSocket -->> client -- : Возврат HTML страницы "Игровая комната"
+    WebSocket --> client -- : Возврат данных
     |||
     == Игровой ход ==
     client ->> WebSocket ++ #65d3ff : Игровой ход
@@ -42,8 +41,7 @@ alt#Gold #ebffdd Если существует событие
     end
 else #ffeeee Если событие не найдено
     autonumber 5
-    WebSocket -->> client !! : Возврат, кода ошибки\n отсутствия указанного события
-    deactivate WebSocket
+    server -->> client !! : Возврат, кода ошибки\n отсутствия указанного события
     |||
 end
 @enduml
