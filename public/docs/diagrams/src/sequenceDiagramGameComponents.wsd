@@ -1,0 +1,81 @@
+@startuml sequenceDiagramGameComponents
+title Детальный сценарий: взаимодействие клиента с игровыми компонентами
+
+actor AdminClient
+actor ActiveClient
+actor OtherClients
+participant EventSystem
+participant GameRoom
+participant GameHandler
+participant GameSession
+' participant Card
+' participant Player
+
+== Вход в игру ==
+note over ActiveClient, OtherClients
+Все игроки проходят авторизацию аналогично AdminClient
+и добавляются в GameSession до начала игры.
+end note
+
+AdminClient -> EventSystem ++ : событие: Авторизация игрока
+EventSystem -> GameRoom --++ : Авторизация игрока
+GameRoom -> GameSession ++ : Обновление или добавление игрока
+GameSession --> GameRoom -- : Подтверждение добавления игрока
+GameRoom -> GameHandler --++ : Получить последние данные
+GameHandler -->> AdminClient -- : Вернуть данные
+|||
+== Начало Игры ==
+AdminClient -> EventSystem ++ : событие: Начать игру
+EventSystem -> GameRoom --++ : Проверка пользователя как\n существующего игрока
+GameRoom -> GameSession ++ : проверить существование игрока
+GameSession --> GameRoom -- : Игрок найден / не найден
+GameRoom -> GameHandler --++ : (Передача) события: Начать игру
+
+GameHandler -> GameSession ++ : Проверка допустимого\n количества игроков
+GameSession --> GameHandler -- : Возвращает допустимое\n количество игроков
+GameHandler -> GameSession ++ : Инициализация и генерация\n идентификатора сессии
+GameSession --> GameHandler -- : Возвращает идентификатор сессии
+GameHandler -> GameSession ++ : Получить игровые данные\n(Колоду карт, игровое поле и тд.)
+GameSession --> GameHandler -- : Возвращает запрашиваемые\n игровые данные
+|||
+GameHandler -> GameHandler ++-- #d6d300 : Определить роли игрокам
+GameHandler --> GameSession ++ : Сохранить роли для игрока
+GameSession --> GameHandler -- : Результат сохранения
+
+GameHandler -> GameHandler ++-- #d6d300 : Определение последовательности\n ходов игроков. Шериф должен\n ходить первый
+GameHandler --> GameSession ++ : Сохранить последовательность ходов для игрока
+GameSession --> GameHandler -- : Результат сохранения
+
+GameHandler -> GameHandler ++-- #d6d300 : Определяет расстояния между игроками
+GameHandler --> GameSession ++ : Сохранить расстояния между игроками
+GameSession --> GameHandler -- : Результат сохранения
+|||
+== Этап выбора персонажей ==
+
+loop#Gold Для каждого игрока
+    GameHandler -> GameHandler ++-- #d6d300 : Назначить активного игрока на текущий раунд
+    GameHandler -> GameHandler ++-- #d6d300 : Определить невыбранных персонажей для игрока
+
+    GameHandler -->> OtherClients : Список доступных персонажей
+    GameHandler --[#red]>> ActiveClient : Список доступных персонажей
+    deactivate GameHandler
+
+    ActiveClient -[#red]> EventSystem ++ : событие: Выбрал персонажа
+    EventSystem -> GameRoom --++ : Проверка пользователя как\n существующего игрока
+    GameRoom -> GameSession ++ : проверить существование игрока
+    GameSession --> GameRoom -- : Игрок найден / не найден
+    GameRoom -> GameHandler --++ : (Передача) события: Выбрал персонажа
+
+    GameHandler -> GameHandler ++-- #d6d300 : Переопределяет доступных\n персонажей с учетом выбранного
+    GameHandler --> GameSession ++ : Сохранить выбранного персонажа\n для игрока
+    GameSession --> GameHandler -- : Результат сохранения
+    GameHandler -->> OtherClients : Сообщает о выбранном персонаже
+    GameHandler --[#red]>> ActiveClient : Сообщает о выбранном персонаже
+end
+
+== Этап хода ==
+GameHandler -> GameHandler ++-- #d6d300 : Назначить активного игрока на текущий раунд
+
+deactivate GameHandler
+|||
+@enduml

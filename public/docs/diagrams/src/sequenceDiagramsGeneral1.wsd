@@ -8,10 +8,10 @@ participant WebSocket #65d3ff
 autonumber
 ==Переход на сайт==
 client -> server ++ #00dac7 : Переход на главную страницу / сайт
-server -> server ++-- #005500 : вызов события "для страницы Входа"
+server -> server ++-- #005500 : событие: Загрузка главной страницы
 alt#Gold #ebffdd Если существует событие
-    server -> server ++-- #d6d300 : Генерация html страницы "Входа"
-    server --> client : Возврат HTML страницы "Входа"
+    server -> server ++-- #d6d300 : Подготовка страницы "Входа"
+    server --> client : Возврат страницы "Входа"
 else #ffeeee Если событие не найдено
     autonumber 3
     server -->> client !! : Возврат, кода ошибки\n отсутствия указанного события
@@ -28,8 +28,8 @@ alt#Gold #ebffdd Если существует событие
     client ->> WebSocket : Попытка авторизации
     WebSocket -> WebSocket ++-- #005500 : Вызов события
     WebSocket -> WebSocket ++-- #d6d300 : Авторизация пользователя как игрока
-    WebSocket -> WebSocket ++-- #d6d300 : Генерация html страницы "Игровая комната"
-    WebSocket -->> client -- : Возврат HTML страницы "Игровая комната"
+    WebSocket -> WebSocket ++-- #d6d300 : Подготовка страницы "Игровая комната"
+    WebSocket -->> client -- : Возврат страницы "Игровая комната"
     |||
     == Игровой ход ==
     client ->> WebSocket ++ #65d3ff : Игровой ход
