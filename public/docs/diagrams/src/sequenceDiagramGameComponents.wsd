@@ -13,6 +13,7 @@ participant GameSession
 == Вход в игру ==
 ActiveClient -[#red]> EventSystem ++ : событие: Авторизация игрока
 EventSystem -> GameRoom --++ : Авторизация игрока
+GameRoom -> GameRoom ++-- #d6d300 : Обработка данных
 GameRoom -> GameSession ++ : Обновление или добавление игрока
 GameSession --> GameRoom -- : Подтверждение добавления игрока
 
@@ -20,7 +21,7 @@ alt#Gold #LightBlue Если код доступа админа верный
     GameRoom -> GameRoom ++-- #d6d300 : Дать админ права
 else Если код доступа админа неверный
     GameRoom --[#red]>> ActiveClient : Вернуть ошибку
-    destroy GameRoom
+    deactivate GameRoom
     |||
 end
 
@@ -37,7 +38,7 @@ GameRoom -> GameRoom ++-- #d6d300 : Проверка кода доступа а�
 
 opt#Gold #LightBlue Если код доступа админа - **НЕ** верный
     GameRoom --[#red]>> ActiveClient : Вернуть ошибку
-    destroy GameRoom
+    deactivate GameRoom
     |||
 end
 
@@ -161,7 +162,7 @@ loop#Gold #LightBlue Пока партия не завершена
             GameHandler -> GameHandler ++-- #d6d300 : Завершить игру
             GameHandler -> GameSession ++ : Обновить данные состояния игры
             GameSession -->> GameHandler -- : Результат обновления
-            destroy GameHandler
+            deactivate GameHandler
             |||
         end
 
