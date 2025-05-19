@@ -1,0 +1,60 @@
+@startuml activityDiagramUserRequestsPage
+' skinparam DefaultTextAlignment center
+skinparam ActivityFontSize 14
+skinparam NoteFontSize 14
+skinparam TitleFontSize 20
+skinparam ArrowFontSize 16
+' !pragma useVerticalIf on
+title "Диаграмма активности: Пользователь запрашивает страницу"
+
+start
+partition #LightCyan EventSystem {
+    :Получить и разобрать событие "Получить страницу";
+
+    if (Событие зарегистрировано в системе?) then (нет)
+        #pink:Ошибка "Событие
+        авторизации не найдено";
+        stop
+    else (да)
+        :Получить страницу через PageRouter;
+    endif
+}
+partition #LightCyan PageRouter {
+    :Получены данные
+    (Имя, "админ код", id Сессии)
+    для авторизации если есть;
+
+    partition #LightSeaGreen GameRoom {
+        :Выполнить авторизацию пользователя;
+    }
+
+    if (Пользователь авторизированный ?) then (НЕТ)
+        partition #LightGoldenRodYellow RenderPage {
+            :Выполнить рендер страницы "Авторизация";
+        }
+    else(ДА)
+        partition #LightGoldenRodYellow RenderPage {
+            :Выполнить рендер страницы "Игровая комната";
+            :Получены данные о пользователе
+            (Имя, "админ код", id Сессии);
+
+            partition #LightSeaGreen GameRoom {
+                :Выполнить проверку на корректность "Админ код";
+            }
+
+            if ("Админ код" корректен) then (ДА)
+                :Добавить в генерацию страницы
+                "Блок управления";
+            endif
+        }
+    endif
+
+    if (Удалось отрендерить страницу) then (ДА)
+        #PaleGreen:Вернуть страницу;
+        stop
+    else(НЕТ)
+        #pink:Ошибка "Не удалось сгенерировать страницу";
+        stop
+    endif
+}
+@enduml
