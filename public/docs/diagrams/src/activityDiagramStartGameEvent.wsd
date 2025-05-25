@@ -66,6 +66,7 @@ partition #LightSteelBlue GameHandler {
     endif
 
     partition #LightBlue GameSession {
+        :Инициализация Персонажей для игроков;
         :Инициализация роли для игроков;
         :Инициализация игроков (PlayerManager);
         :Инициализация дистанции между игроками (PlayersDistances);

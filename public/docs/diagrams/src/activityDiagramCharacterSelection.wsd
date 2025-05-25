@@ -1,0 +1,109 @@
+@startuml activityDiagramCharacterSelection
+' skinparam DefaultTextAlignment center
+skinparam ActivityFontSize 14
+skinparam NoteFontSize 14
+skinparam TitleFontSize 20
+skinparam ArrowFontSize 16
+
+title ""Диаграмма активности: Процесс выбора персонажей""
+
+start
+while (У всех игроков есть персонаж?)
+    partition #LightSteelBlue GameHandler {
+        partition #LightBlue GameSession {
+            partition #LightGray PlayerManager {
+                :Определить игрока который сейчас будет ходить;
+                :Передать игрока;
+            }
+        }
+
+        :Присвоить выбранному игроку статус "Активного";
+        partition #LightBlue GameSession {
+            partition #LightGray PlayerManager {
+                :Сохранить статус для игрока;
+            }
+        }
+
+        :Определить список доступных персонажей;
+        partition #LightBlue GameSession {
+            partition #LightGray Персонажи {
+                :Передать список персонажей;
+            }
+        }
+
+        :Перейти в ожидании события;
+        :Отправить информации и данные клиенту;
+    }
+
+    partition #LightGoldenRodYellow GameRoom {
+        :Отправить информации об "Активном игроке";
+        :Отправить информации для "Активного игроке" (список персонажей);
+    }
+
+    partition #LightGreen Client {
+        :Получить данные об активном игроке и список персонажей;
+        :Выбрать персонажа;
+        :Отправить событие "Выбрал персонажа";
+    }
+
+    partition #LightCyan EventSystem {
+        :Получить и разобрать событие "Выбрал персонажа;
+
+        if (Событие зарегистрировано в системе?) then (нет)
+        #pink:Ошибка "Событие
+        авторизации не найдено";
+        stop
+        else (да)
+        :Передать текущее событие "Выбрал персонажа"
+        для GameHandler через GameRoom;
+        endif
+        }
+
+        partition #LightGoldenRodYellow GameRoom {
+        :Выполнить авторизацию пользователя;
+
+        partition #LightCyan EventSystem {
+        :Вызвать событие авторизации;
+        }
+
+        if (Удалось авторизоваться?) then (нет)
+        #pink:Передать ошибку от авторизации;
+        stop
+        else (да)
+        :Получить данные о пользователи;
+        :Запуск выбора персонажа;
+        endif
+        }
+
+        partition #LightSteelBlue GameHandler {
+        :Получить данные о выбранном персонаже, об игроке и о событии;
+        if (Это событие "Выбора персонажа"?) then (нет)
+        #pink:Ошибка "Событие не является 'Выбором персонажа'";
+        stop
+        else (да)
+        :Проверить на Активного игрока;
+        endif
+
+
+        if (Это активный игрок?) then (нет)
+        #pink:Ошибка "Вы не являетесь активным игроком";
+        stop
+        else (да)
+        :Получить данные о выбранном персонаже;
+        endif
+
+        partition #LightBlue GameSession {
+            partition #LightGray Персонажи {
+                :Удалить из списка персонажа;
+            }
+        }
+
+        partition #LightGoldenRodYellow GameRoom {
+            :Сообщить всем игрока о выбранном персонаже;
+        }
+    }
+
+endwhile (НЕТ)
+:Переход к этапу "Раздача карт";
+stop
+@enduml
