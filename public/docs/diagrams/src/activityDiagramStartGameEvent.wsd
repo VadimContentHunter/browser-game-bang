@@ -1,0 +1,142 @@
+@startuml activityDiagramStartGameEvent
+' skinparam DefaultTextAlignment center
+skinparam ActivityFontSize 14
+skinparam NoteFontSize 14
+skinparam TitleFontSize 20
+skinparam ArrowFontSize 16
+
+title "Обработка события "Начать игру"
+
+start
+partition #LightCyan EventSystem {
+    :Получить и разобрать событие "Начать игру";
+
+    if (Событие зарегистрировано в системе?) then (нет)
+        #pink:Ошибка "Событие
+        авторизации не найдено";
+    stop
+    else (да)
+        :Передать текущее событие "Начать игру"
+         для GameHandler через GameRoom;
+    endif
+}
+
+partition #LightGoldenRodYellow GameRoom {
+    :Выполнить авторизацию пользователя;
+
+    partition #LightCyan EventSystem {
+        :Вызвать событие авторизации;
+    }
+
+    if (Удалось авторизоваться?) then (нет)
+        #pink:Передать ошибку от авторизации;
+        stop
+    else (да)
+        :Получить данные о пользователи;
+        :Выполнить проверку на корректность "Админ код";
+        
+    endif
+
+    if ("Админ код" корректен) then (НЕТ)
+        #pink:Ошибка "У вас недостаточно
+         прав для выполнения этого действия";
+        stop
+    else (ДА)
+        :Выполнить запуск игры;
+    endif
+}
+
+partition #LightSteelBlue GameHandler {
+    :Получить событие, данные 
+    для события, данные о пользователе;
+
+    if (Запущенна ли Игра) then (ДА)
+        #pink:Ошибка "Невозможно начать игру
+        пока предыдущая не будет закончена";
+        stop
+    else (НЕТ)
+        :Выполнить проверку на кол-во игроков;
+    endif
+
+    if (Количество игроков приемлемое) then (НЕТ)
+        #pink:Ошибка "Количество игроков НЕ приемлемо";
+        stop
+    else (ДА)
+        :Выполнить инициализацию игровой сессии;
+    endif
+
+    partition #LightBlue GameSession {
+        :Инициализация роли для игроков;
+        :Инициализация игроков (PlayerManager);
+        :Инициализация дистанции между игроками (PlayersDistances);
+        :Инициализация Поля боя (PlayArea);
+        :Инициализация основной колоды (CardDeck);
+        :Инициализация колоды сброса (DiscardPile);
+    }
+
+    :Определить роли для игроков;
+
+    partition #LightBlue GameSession {
+        partition #LightGray Роли {
+            :Получить доступные роли для Игроков;
+            :Передать доступные роли для Игроков;
+        }
+    }
+
+    :Выполнить установку ролей для игроков;
+    :Вызвать сохранение данных игроков в PlayerManager;
+
+    partition #LightBlue GameSession {
+        partition #LightGray PlayerManager {
+            :Сохранить / обновить данные игрока;
+        }
+    }
+
+    if (Всем играющим игрокам была установлена роль ?) then (НЕТ)
+        #pink:Ошибка "Не все игроки получили роль";
+        stop
+    else (ДА)
+        :Определить последовательность
+            ходов игроков;
+    endif
+
+    partition #LightBlue GameSession {
+        partition #LightGray PlayerManager {
+            :Установить последовательности
+            ходов игроков (Шериф ходит первый);
+        }
+    }
+
+    if (Для всех играющим игроков была\n установлена последовательность ходов ?) then (НЕТ)
+        #pink:Ошибка "Не для всех игроков удалось
+         определить последовательность ходов";
+        stop
+    else (ДА)
+        :Получить данные для дистанции между игроками;
+
+        partition #LightBlue GameSession {
+            partition #LightGray PlayerManager {
+                :Получить список игроков;
+            }
+        }
+    endif
+
+    :Передать данные для дистанции между игроками;
+
+    partition #LightBlue GameSession {
+        partition #LightGray PlayersDistances {
+            :Установить дистанции между игроками;
+        }
+    }
+
+    if (Для всех играющим игроков была\n установлена дистанция ?) then (НЕТ)
+        #pink:Ошибка "Не для всех игроков удалось
+         установить дистанцию";
+        stop
+    else (ДА)
+        :Переход к этапу "Выбора персонажей";
+        stop
+    endif
+}
+
+@enduml
