@@ -3,35 +3,36 @@ import session from 'express-session';
 import { WebSocketServer, WebSocket } from 'ws'; // Импортируем WebSocketServer и WebSocket из ws
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 import { IncomingMessage } from 'http';
 
-const __filename = fileURLToPath(import.meta.url); // <-- добавил
-const __dirname = dirname(__filename); // <-- добавил
+import './types/express-session-augment.js';
+
+const __filename = fileURLToPath(import.meta.url); // полный путь к файлу /var/www/browser-game-bang/dist/server.js
+const __dirname = path.dirname(__filename); // путь к папке файла /var/www/browser-game-bang/dist
+const __projectRoot = path.resolve(__dirname, '../app'); // /var/www/browser-game-bang/app
+
+// console.log(`filename ${__filename}`);
+// console.log(`dirname ${__dirname}`);
+// console.log(`projectRoot ${__projectRoot}`);
 
 const app = express();
 
-// Настройка express-session
-// const sessionParser = session({
-//     secret: 'your_secret_key', // Замените на свой секрет
-//     resave: false,
-//     saveUninitialized: true,
-//     cookie: {
-//         maxAge: 24 * 60 * 60 * 1000, // 1 день
-//     },
-// });
+app.use(
+    session({
+        secret: 'мой_секрет', // для подписи cookie
+        resave: false,
+        saveUninitialized: false,
+        cookie: { secure: false }, // для разработки без HTTPS
+    })
+);
 
-// Указываем типы для req, res и next
-// app.use((req: Request, res: Response, next: NextFunction) => {
-//     sessionParser(req, res, next);
-// });
-
-// Обслуживаем статические файлы из папки public
-// app.use(express.static(path.join(__dirname, 'public')));
+// Парсинг входящих данных
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 // Роут для главной страницы
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'main.html'));
+    res.sendFile(path.join(__projectRoot, 'main.html'));
 });
 
 // Запуск сервера
@@ -43,19 +44,14 @@ const server = app.listen(PORT, () => {
 // Создание WebSocket сервера, привязанного к существующему серверу
 const wss = new WebSocketServer({ server });
 
-// Расширяем тип для запроса
-// interface SessionRequest extends IncomingMessage {
-//     session?: session.Session & Partial<session.SessionData>;
-// }
-
 wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
-    // Если сессия существует, извлекаем данные сессии
-    // const session = req.session;
-
     console.log('Новый WebSocket клиент подключился');
-    // if (session) {
-    //     console.log('Сессия:', session);
-    // }
+
+    // Если сессия существует, извлекаем данные сессии
+    const session = req.session;
+    if (session) {
+        console.log('Сессия:', session);
+    }
 
     ws.on('message', (message) => {
         let text: string;

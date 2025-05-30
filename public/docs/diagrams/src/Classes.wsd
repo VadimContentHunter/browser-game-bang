@@ -1,9 +1,0 @@
-@startuml components
-
-class Card
-class Player
-class Deck
-class DiscardDeck
-
-
-@enduml
