@@ -1,32 +1,38 @@
 import express, { Request, Response, NextFunction } from 'express';
+import morgan from 'morgan';
 import session from 'express-session';
+import cookie from 'cookie';
 import cookieParser from 'cookie-parser';
 import { WebSocketServer, WebSocket } from 'ws';
+
 import path from 'path';
 import http from 'http';
 import net from 'net';
 import { fileURLToPath } from 'url';
-import { IncomingMessage } from 'http';
 import { v4 as uuidv4 } from 'uuid';
+import { faker } from '@faker-js/faker';
+import Stream from 'stream';
 
 const __filename = fileURLToPath(import.meta.url); // полный путь к файлу /var/www/browser-game-bang/dist/server.js
 const __dirname = path.dirname(__filename); // путь к папке файла /var/www/browser-game-bang/dist
 const __projectRoot = path.resolve(__dirname, '../app'); // /var/www/browser-game-bang/app
 const sessionParser = session({
     saveUninitialized: false,
-    secret: 'мой_секрет',
+    secret: 'my secret_test',
     resave: false,
     cookie: { secure: false },
 });
 
 const app = express();
+
+app.use(morgan('dev'));
 app.use(sessionParser);
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+// app.use(express.urlencoded({ extended: true }));
+// app.use(express.json());
 
 app.get('/', (req: Request, res: Response) => {
     if (!req.session.username) {
-        req.session.username = `Игрок_${uuidv4()}`;
+        req.session.username = faker.internet.username();
         req.session.save((err) => {
             if (err) {
                 console.error('Ошибка сохранения сессии:', err);
@@ -54,35 +60,48 @@ const server = app.listen(PORT, () => {
 });
 
 // Создание WebSocket сервера, привязанного к существующему серверу
-const wss = new WebSocketServer({ server });
+const wss = new WebSocketServer({ noServer: true });
 
-wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
-    // const cookies = cookieParser.signedCookies(req.headers.cookie, 'your-secret-key');
-    // const sessionId = cookies['connect.sid'];
+wss.on('connection', (ws: WebSocket, req: http.IncomingMessage) => {
+    // Извлечь сессию, которая была прикреплена в upgrade (см. ниже)
+    const session = req.session;
+    if (!session) {
+        ws.close(1008, 'Нет сессии');
+        return;
+    }
 
-    // if (!session.username) {
-    //     session.username = `Игрок_${uuidv4()}`; // создаём username при отсутствии
-    //     session.save((err) => {
-    //         if (err) console.error('Ошибка сохранения сессии:', err);
-    //     });
-    // }
+    console.log('WS: Новый пользователь:', session.username);
 
-    // console.log('Сессия пользователя:', session.username);
+    ws.send(`Привет, ${session.username}! Добро пожаловать в WebSocket.`);
 
     ws.on('message', (message) => {
-        let text: string;
+        console.log(`Получено сообщение от ${session.username}: ${message}`);
+        ws.send(`Вы отправили: ${message}`);
+    });
+});
 
-        if (typeof message === 'string') {
-            text = message; // Уже строка
-        } else if (message instanceof Buffer) {
-            text = message.toString(); // Без аргумента
-        } else {
-            console.warn('Неизвестный тип сообщения');
+server.on('upgrade', (req: http.IncomingMessage, socket: Stream.Duplex, head: Buffer<ArrayBufferLike>) => {
+    // Парсим куки из заголовков
+    const cookies = cookie.parse(req.headers.cookie || '');
+    const sidCookie = cookies['connect.sid'];
+
+    if (!sidCookie) {
+        socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+        socket.destroy();
+        return;
+    }
+
+    // Сессию нужно достать из sessionParser
+    // sessionParser использует internalStore, его можно получить через callback
+    sessionParser(req as Request, {} as Response, () => {
+        if (!req.session) {
+            socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+            socket.destroy();
             return;
         }
 
-        console.log('Получено сообщение:', text);
+        wss.handleUpgrade(req, socket, head, (ws) => {
+            wss.emit('connection', ws, req);
+        });
     });
-
-    ws.send('Добро пожаловать в WebSocket-сервер!');
 });
