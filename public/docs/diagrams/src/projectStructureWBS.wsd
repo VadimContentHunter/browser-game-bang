@@ -1,0 +1,16 @@
+@startwbs projectStructureWBS
+* Game
+** Cards
+
+*** Shared
+**** Interfaces
+*****_ iCard.ts
+**** CardActions
+*****_ DamageAction.ts (UseCases, I-DCI)
+
+*** BangCard
+****_ BangCardData.ts (Entity, D-DCI)
+**** UseCases
+*****_ BangCardPlay.ts (UseCases, C-DCI)
+*****_ BangCardDiscard.ts (UseCases, C-DCI)
+@endwbs
