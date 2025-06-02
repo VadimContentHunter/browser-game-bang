@@ -1,5 +1,7 @@
 @startwbs projectStructureWBS
 * Game
+
+
 ** Cards
 
 *** Shared
@@ -13,4 +15,5 @@
 **** UseCases
 *****_ BangCardPlay.ts (UseCases, C-DCI)
 *****_ BangCardDiscard.ts (UseCases, C-DCI)
+*****_ BangCardPlayAndDiscard.ts (UseCases, C-DCI)
 @endwbs
