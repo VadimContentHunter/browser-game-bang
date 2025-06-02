@@ -25,7 +25,6 @@ component GameSession {
 ' Связи
 Card - iC
 Player - iP
-PlayerManager - iPM
 GSP1 -up- iGS
 
 GameHandler .. iGS : USE
@@ -35,7 +34,7 @@ DiscardPile       .> iC
 CardDeck          .> iC
 PlayerManager     .> iC
 PlayersDistances  .> iC
-GameRoom .. iPM : USE
+
 PlayerManager     .. iP : USE
 PlayersDistances  .. iP : USE
 Player .up. iC : USE
